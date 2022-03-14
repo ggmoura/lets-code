@@ -25,7 +25,7 @@ public class InitialDataLoaderListener {
 	@Autowired
 	private BCryptPasswordEncoder encoder;
 
-	@Value(value = "${letscode.authentication.mustbeinitialize.data:false}")
+	@Value(value = "${letscode.authentication.mustbeinitialize.data:true}")
 	private boolean mustBeInitialize;
 
 

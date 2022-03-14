@@ -1,4 +1,4 @@
-package br.com.letscode.security.web;
+package br.com.letscode.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

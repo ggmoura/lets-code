@@ -2,7 +2,7 @@ package br.com.letscode.token.web;
 
 import br.com.letscode.commons.ResponseObject;
 import br.com.letscode.exception.BusinessException;
-import br.com.letscode.security.web.JwtConfig;
+import br.com.letscode.security.JwtConfig;
 import br.com.letscode.token.entity.User;
 import br.com.letscode.token.model.AditionalClaim;
 import br.com.letscode.token.model.ResponseToken;

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class CombinadoOpenAPIConfig {
+public class OpenAPIConfig {
 
 	private static final String ZUP_URL = "https://www.letscode.com.br/";
 	private static final String BEARER_SCHEME = "bearer";
@@ -20,7 +20,7 @@ public class CombinadoOpenAPIConfig {
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 
 	@Bean
-	public OpenAPI customOpenAPI(CombinadoOpenApiAppParam params) {
+	public OpenAPI customOpenAPI(OpenApiAppParam params) {
 		return new OpenAPI()
 			.addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEMES))
 			.components(new Components().addSecuritySchemes(SECURITY_SCHEMES, securityScheme()))

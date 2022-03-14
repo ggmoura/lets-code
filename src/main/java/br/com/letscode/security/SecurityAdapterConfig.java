@@ -1,4 +1,4 @@
-package br.com.letscode.security.web;
+package br.com.letscode.security;
 
 import br.com.letscode.commons.ResponseMessage;
 import br.com.letscode.commons.ResponseObject;

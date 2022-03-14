@@ -4,12 +4,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CombinadoOpenApiAppParam {
+public class OpenApiAppParam {
 
-	@Value("${letscode.app.project.description:Combinado - Information Technology}")
+	@Value("${letscode.app.project.description:Let's Code - Aprenda a programar}")
 	private String description;
 
-	@Value("${letscode.app.project.name:Combinado Api}")
+	@Value("${letscode.app.project.name:Let's Code Api}")
 	private String title;
 
 	@Value("${letscode.app.project.appversion:0.0.1-SNAPSHOT}")

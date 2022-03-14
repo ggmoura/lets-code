@@ -1,7 +1,7 @@
 package br.com.letscode.token.web;
 
-import br.com.letscode.security.web.JwtConfig;
-import br.com.letscode.security.web.JwtTokenAuthenticationFilter;
+import br.com.letscode.security.JwtConfig;
+import br.com.letscode.security.JwtTokenAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
