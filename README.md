@@ -49,7 +49,8 @@ Copie o conteúdo do field token da resposta e utilize na interface do Swagger `
     "refresh-token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ..."
 }
 ```
-![Home_Swagger] (/data/swagger-auth.png)
+
+![Alt text](doc/swagger-auth.png?raw=true "Configurando token JWT no swagger"))
 
 # Fluxo padrão
 
@@ -58,3 +59,11 @@ Copie o conteúdo do field token da resposta e utilize na interface do Swagger `
  * POST /quizzes/response
 
 Sempre que quiser iniciar um novo Quiz deve acionar o endpoint ```GET /quizzes/start```, e antes de responder uma step deve criá-la utilizando o endpoint ```GET /quizzes/next-step```
+
+Um novo PLAYER pode ser cadastrado utilizando o endpoint ```POST /players``` de pleyer-controller
+
+O sisstema já inicializa com 21 filmes, é possível cadastrar novos filmes utilizando o serviço do ```http://www.omdbapi.com``` utilizando dois enpoints,
+ * ```POST /movies/title``` informando exatamente o título do filme
+ * ```POST /movies/imdbid``` informando o imdbid da plataforma
+
+
