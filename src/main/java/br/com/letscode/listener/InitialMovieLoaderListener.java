@@ -2,6 +2,8 @@ package br.com.letscode.listener;
 
 import br.com.letscode.entity.Movie;
 import br.com.letscode.service.MovieService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -25,6 +27,8 @@ public class InitialMovieLoaderListener {
     @Autowired
     private TaskExecutor taskExecutor;
 
+    private Logger logger = LoggerFactory.getLogger(InitialMovieLoaderListener.class);
+
 
     @EventListener
     @Transactional
@@ -37,7 +41,13 @@ public class InitialMovieLoaderListener {
 
     private void updateMovies() {
         taskExecutor.execute(() -> {
-            properties.getMovies().parallelStream().forEach(movie -> service.createMovieByImdbID(movie));
+            properties.getMovies().parallelStream().forEach(movie -> {
+                try {
+                    service.createMovieByImdbID(movie);
+                } catch (Exception ex) {
+                    logger.error("Erro ao processar filme ".concat(movie), ex);
+                }
+            });
         });
     }
 

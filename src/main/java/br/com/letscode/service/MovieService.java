@@ -2,6 +2,7 @@ package br.com.letscode.service;
 
 import br.com.letscode.client.MovieClient;
 import br.com.letscode.commons.ResponseMessage;
+import br.com.letscode.configuration.SharedPropertiesConfiguration;
 import br.com.letscode.controller.model.movie.MovieDTO;
 import br.com.letscode.entity.Movie;
 import br.com.letscode.exception.BusinessException;
@@ -23,18 +24,18 @@ public class MovieService {
     @Autowired
     private ModelMapper mapper;
 
-    @Value("${client.omdbapi.apikey}")
-    private String apiKey;
+    @Autowired
+    private SharedPropertiesConfiguration properties;
 
     public MovieDTO createMovieByTytle(String title) {
-        MovieDTO movie = client.getMovieByTitle(apiKey, title);
+        MovieDTO movie = client.getMovieByTitle(properties.getApiKey(), title);
         validateMovie(movie);
         movieRepository.save(mapper.map(movie, Movie.class));
         return movie;
     }
 
     public MovieDTO createMovieByImdbID(String imdbID) {
-        MovieDTO movie = client.getMovieByImdbID(apiKey, imdbID);
+        MovieDTO movie = client.getMovieByImdbID(properties.getApiKey(), imdbID);
         validateMovie(movie);
         movieRepository.save(mapper.map(movie, Movie.class));
         return movie;
@@ -43,6 +44,11 @@ public class MovieService {
     private void validateMovie(MovieDTO movie) {
         if (movie.getResponse().equals("False")) {
             throw new BusinessException(ResponseMessage.error(movie.getError()));
+        }
+        if (movie.getImdbRating().equals("N/A") || movie.getImdbVotes().equals("N/A")) {
+            throw new BusinessException(ResponseMessage.error(
+                    "Filme sem dados suficientes na plataforma {0}, ImdbRating={1}, ImdbVotes={2}",
+                    "http://www.omdbapi.com", movie.getImdbRating(), movie.getImdbVotes()));
         }
     }
 

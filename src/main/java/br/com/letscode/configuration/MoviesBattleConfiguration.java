@@ -2,21 +2,12 @@ package br.com.letscode.configuration;
 
 import static br.com.letscode.commons.Constant.BASE_PACKAGE;
 
-import com.fasterxml.jackson.databind.Module;
-import feign.codec.Encoder;
-import feign.form.spring.SpringFormEncoder;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InjectionPoint;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.cloud.openfeign.support.PageJacksonModule;
-import org.springframework.cloud.openfeign.support.SortJacksonModule;
-import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.context.annotation.*;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;

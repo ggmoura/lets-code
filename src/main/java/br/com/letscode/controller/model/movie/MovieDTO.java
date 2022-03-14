@@ -8,7 +8,12 @@ public class MovieDTO {
 
     @JsonProperty("Title")
     public String title;
+
     public String imdbID;
+
+    public String imdbRating;
+
+    private String imdbVotes;
 
     @JsonProperty("Response")
     public String response;
@@ -46,5 +51,21 @@ public class MovieDTO {
 
     public void setResponse(String response) {
         this.response = response;
+    }
+
+    public String getImdbRating() {
+        return imdbRating;
+    }
+
+    public void setImdbRating(String imdbRating) {
+        this.imdbRating = imdbRating;
+    }
+
+    public String getImdbVotes() {
+        return imdbVotes;
+    }
+
+    public void setImdbVotes(String imdbVotes) {
+        this.imdbVotes = imdbVotes;
     }
 }
