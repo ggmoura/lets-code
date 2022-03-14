@@ -1,0 +1,11 @@
+   __    _              _     _            ____               _           __
+  / /   | |       ___  | |_  ( )  ___     / ___|   ___     __| |   ___    \ \
+ / /    | |      / _ \ | __| |/  / __|   | |      / _ \   / _` |  / _ \    \ \
+ \ \    | |___  |  __/ | |_      \__ \   | |___  | (_) | | (_| | |  __/    / /
+  \_\   |_____|  \___|  \__|     |___/    \____|  \___/   \__,_|  \___|   /_/
+
+                                                                         
+Application Name: Let's Code
+Application Version: 0.0.1
+Spring Boot${spring-boot.formatted-version}
+${AnsiColor.DEFAULT}

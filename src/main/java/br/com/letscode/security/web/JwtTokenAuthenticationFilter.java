@@ -36,7 +36,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException {
 		try {
 			String header = request.getHeader(jwtConfig.getHeader());
 			if (header != null && header.startsWith(jwtConfig.getPrefix())) {
@@ -46,7 +46,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 				if (edgeId != null) {
 					final List<String> privileges = new ArrayList<>();
 					final List<String> roles = claims.get(jwtConfig.getClaimRolesField(), List.class);
-					privileges.addAll(roles.stream().map(r -> ROLE_PREFIX.concat(r)).collect(Collectors.toList()));
+					privileges.addAll(roles.stream().map(ROLE_PREFIX::concat).collect(Collectors.toList()));
 					final List<SimpleGrantedAuthority> authorities = privileges.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 					AppPrincipal auth = new AppPrincipal(getUserPrincipal(claims), null, authorities);
 					SecurityContextHolder.getContext().setAuthentication(auth);
@@ -55,7 +55,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 			chain.doFilter(request, response);
 		} catch (BusinessException e) {
 			ResponseObject<Void> body = new ResponseObject<>();
-			e.getErrors().forEach(err -> body.addMessage(err));
+			e.getErrors().forEach(body::addMessage);
 			response.setStatus(e.getHttpStatus().value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.getWriter().write(mapper.writeValueAsString(body));
@@ -73,6 +73,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 	private UserPrincipal getUserPrincipal(Claims claims) {
 		final UserPrincipal principal = new UserPrincipal();
 		principal.setName(claims.get("name", String.class));
+		principal.setUsername(claims.get("sub", String.class));
 		return principal;
 	}
 
