@@ -5,6 +5,7 @@ import br.com.letscode.commons.ResponseMessage;
 import br.com.letscode.configuration.SharedPropertiesConfiguration;
 import br.com.letscode.controller.model.movie.MovieDTO;
 import br.com.letscode.controller.model.movie.MovieResponse;
+import br.com.letscode.controller.model.quiz.QuizRankingResponse;
 import br.com.letscode.controller.model.quiz.QuizResponse;
 import br.com.letscode.controller.model.quiz.QuizStepRequest;
 import br.com.letscode.controller.model.quiz.QuizStepResponse;
@@ -20,6 +21,7 @@ import br.com.letscode.token.entity.User;
 import br.com.letscode.token.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,6 +58,7 @@ public class QuizService {
         if (quiz.getId() == null) {
             quiz.setUser(user);
             quiz.setScore(0);
+            quiz.setQtdSteps(0);
             quiz.setFinished(Boolean.FALSE);
             quizRepository.save(quiz);
         } else {
@@ -71,6 +74,9 @@ public class QuizService {
 
     private Movie getRandomMovie(List<Long> excludes, Long maxResults, Random random) {
         Integer idMovie = random.nextInt(maxResults.intValue());
+        if (idMovie.equals(0)) {
+            idMovie++;
+        }
         if (excludes.contains(idMovie)) {
             return getRandomMovie(excludes, maxResults, random);
         }
@@ -134,17 +140,20 @@ public class QuizService {
         }
         quizStep.setSelectedMovie(request.getSelectedMovie());
         quizStepRepository.save(quizStep);
+        quiz.setQtdSteps(quiz.getQtdSteps() + 1);
         if (quizStep.getRightAnswer()) {
             quiz.setScore(quiz.getScore() + 1);
-            quizRepository.save(quiz);
         } else {
             Long wrongAnswers = quizStepRepository.countWrongAnswers(user);
             if (wrongAnswers >= 3) {
                 quiz.setFinished(Boolean.TRUE);
-                quizRepository.save(quiz);
-                throw new BusinessException("Você errou qual filme possui maior pontuação, por ser o {0} erro," +
-                        "o Quiz foi finalizado automaticamente", "3");
             }
+        }
+        quizRepository.save(quiz);
+        if (quiz.getFinished()) {
+            throw new BusinessException(
+                    "Você errou qual filme possui maior pontuação 3 vezes, o Quiz foi finalizado automaticamente, " +
+                            "sua porcentagem de acertos foi {0}", String.valueOf(quiz.getScore().doubleValue() / quiz.getQtdSteps()));
         }
         return mapper.map(quizStep, QuizStepResponse.class);
     }
@@ -160,4 +169,7 @@ public class QuizService {
         return  imdbVotes * imdbRating;
     }
 
+    public List<QuizRankingResponse> getRanking(Pageable pageable) {
+        return quizRepository.getRanking(pageable);
+    }
 }

@@ -20,6 +20,9 @@ public class Quiz extends BaseEntity<Long> {
     @Column(name = "score")
     private Integer score;
 
+    @Column(name = "qtd_steps")
+    private Integer qtdSteps;
+
     @Column(name = "finished")
     private Boolean finished;
 
@@ -53,5 +56,13 @@ public class Quiz extends BaseEntity<Long> {
 
     public void setFinished(Boolean finished) {
         this.finished = finished;
+    }
+
+    public Integer getQtdSteps() {
+        return qtdSteps;
+    }
+
+    public void setQtdSteps(Integer qtdSteps) {
+        this.qtdSteps = qtdSteps;
     }
 }

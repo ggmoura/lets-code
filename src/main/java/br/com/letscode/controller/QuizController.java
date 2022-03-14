@@ -2,6 +2,7 @@ package br.com.letscode.controller;
 
 import br.com.letscode.commons.ResponseMessage;
 import br.com.letscode.commons.ResponseObject;
+import br.com.letscode.controller.model.quiz.QuizRankingResponse;
 import br.com.letscode.controller.model.quiz.QuizResponse;
 import br.com.letscode.controller.model.quiz.QuizStepRequest;
 import br.com.letscode.controller.model.quiz.QuizStepResponse;
@@ -9,11 +10,13 @@ import br.com.letscode.security.UserPrincipal;
 import br.com.letscode.service.QuizService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
+import java.util.List;
 
 @RolesAllowed("PLAYER")
 @RestController
@@ -50,6 +53,13 @@ public class QuizController {
             @Valid @RequestBody QuizStepRequest request) {
         QuizStepResponse response = service.responseQuiz(user.getUsername(), request);
         return ResponseObject.of(response);
+    }
+
+    @RolesAllowed({"MANAGER", "PLAYER"})
+    @GetMapping("ranking")
+    public ResponseObject<QuizRankingResponse> ranking(@Parameter(hidden = true) Pageable pageable) {
+        List<QuizRankingResponse> response = service.getRanking(pageable);
+        return ResponseObject.page(response);
     }
 
 }
