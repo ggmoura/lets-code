@@ -9,6 +9,7 @@ import br.com.letscode.controller.model.quiz.QuizRankingResponse;
 import br.com.letscode.controller.model.quiz.QuizResponse;
 import br.com.letscode.controller.model.quiz.QuizStepRequest;
 import br.com.letscode.controller.model.quiz.QuizStepResponse;
+import br.com.letscode.controller.model.user.UserResponse;
 import br.com.letscode.entity.Movie;
 import br.com.letscode.entity.Quiz;
 import br.com.letscode.entity.QuizStep;
@@ -24,9 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 public class QuizService {
@@ -189,6 +192,19 @@ public class QuizService {
     }
 
     public List<QuizRankingResponse> getRanking(Pageable pageable) {
-        return quizRepository.getRanking(pageable);
+        List<User> ranking = userRepository.getRanking(pageable);
+        List<QuizRankingResponse> rankingResponses = new ArrayList<>();
+        for (int i = 0; i < ranking.size(); i++) {
+            var player = new QuizRankingResponse();
+            player.setPosition(i + 1);
+            player.setName(ranking.get(i).getName());
+            if (ranking.get(i).getTotalScore() > 0 || ranking.get(i).getTotalSteps() > 0) {
+                player.setScore(Double.valueOf(ranking.get(i).getTotalScore().doubleValue() / ranking.get(i).getTotalSteps()));
+            } else {
+                player.setScore(0D);
+            }
+            rankingResponses.add(player);
+        }
+        return rankingResponses;
     }
 }

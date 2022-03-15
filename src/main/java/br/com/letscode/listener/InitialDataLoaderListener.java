@@ -47,6 +47,7 @@ public class InitialDataLoaderListener {
 			this.userService.createUserIfNotFound(2L, "player", defaultPass, "Aline", player);
 			this.userService.createUserIfNotFound(3L, "sophia", defaultPass, "Maria Sophia", player, manager);
 			this.userService.createUserIfNotFound(4L, "maite", defaultPass, "Maitê", player);
+			this.userService.createUserIfNotFound(4L, "marta", defaultPass, "Marta Silva", player);
 			this.userService.createUserIfNotFound(5L, "davi", defaultPass, "Davi", player);
 		});
 	}

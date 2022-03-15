@@ -1,5 +1,6 @@
 package br.com.letscode.token.repository;
 
+import br.com.letscode.controller.model.quiz.QuizRankingResponse;
 import br.com.letscode.controller.model.user.UserResponse;
 import br.com.letscode.token.entity.User;
 import org.springframework.data.domain.Page;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends Repository<User, Long> {
@@ -22,5 +24,9 @@ public interface UserRepository extends Repository<User, Long> {
 
 	@Query(value = "SELECT u FROM User u", countQuery = "SELECT count(u) FROM User u")
 	Page<User> findAll(Pageable pageable);
+
+	@Query(value = "SELECT u FROM User u  ORDER BY u.totalSteps  DESC, u.totalScore  DESC",
+			countQuery = "SELECT count(u) FROM User u ORDER BY u.totalSteps  DESC, u.totalScore  DESC")
+	List<User> getRanking(Pageable pageable);
 
 }

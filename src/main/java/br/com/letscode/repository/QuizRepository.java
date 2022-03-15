@@ -17,7 +17,4 @@ public interface QuizRepository extends Repository<Quiz, Long> {
 
     Optional<Quiz> findByUserAndFinished(User user, Boolean finished);
 
-    @Query(value = "SELECT m FROM Quiz m", countQuery = "SELECT count(m) FROM Movie m")
-    List<QuizRankingResponse> getRanking(Pageable pageable);
-
 }

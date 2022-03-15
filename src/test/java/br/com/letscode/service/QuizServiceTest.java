@@ -354,9 +354,9 @@ class QuizServiceTest {
 
     @Test
     void getRanking() {
-        when(quizRepository.getRanking(Pageable.unpaged())).thenReturn(new ArrayList<>());
+        when(userRepository.getRanking(Pageable.unpaged())).thenReturn(new ArrayList<>());
         service.getRanking(Pageable.unpaged());
-        verify(quizRepository, times(1)).getRanking(Pageable.unpaged());
+        verify(userRepository, times(1)).getRanking(Pageable.unpaged());
     }
 
 }

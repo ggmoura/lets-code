@@ -1,19 +1,25 @@
 package br.com.letscode.controller.model.quiz;
 
-import br.com.letscode.token.entity.User;
-
 public class QuizRankingResponse {
 
-    private User user;
-    private Integer position;
+    private String name;
     private Double score;
+    private Integer position;
 
-    public User getUser() {
-        return user;
+    public String getName() {
+        return name;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getScore() {
+        return score;
+    }
+
+    public void setScore(Double score) {
+        this.score = score;
     }
 
     public Integer getPosition() {
