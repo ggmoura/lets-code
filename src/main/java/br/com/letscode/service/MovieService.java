@@ -42,10 +42,10 @@ public class MovieService {
     }
 
     private void validateMovie(MovieDTO movie) {
-        if (movie.getResponse().equals("False")) {
+        if ("False".equals(movie.getResponse())) {
             throw new BusinessException(ResponseMessage.error(movie.getError()));
         }
-        if (movie.getImdbRating().equals("N/A") || movie.getImdbVotes().equals("N/A")) {
+        if ("N/A".equals(movie.getImdbRating()) || "N/A".equals(movie.getImdbVotes())) {
             throw new BusinessException(ResponseMessage.error(
                     "Filme sem dados suficientes na plataforma {0}, ImdbRating={1}, ImdbVotes={2}",
                     "http://www.omdbapi.com", movie.getImdbRating(), movie.getImdbVotes()));

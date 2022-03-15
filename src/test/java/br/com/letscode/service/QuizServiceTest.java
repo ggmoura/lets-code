@@ -354,7 +354,21 @@ class QuizServiceTest {
 
     @Test
     void getRanking() {
-        when(userRepository.getRanking(Pageable.unpaged())).thenReturn(new ArrayList<>());
+        User one = new User();
+        one.setName("Maria Sophia");
+        one.setTotalSteps(10);
+        one.setTotalScore(10);
+
+        User two = new User();
+        two.setName("Maria Sophia");
+        two.setTotalSteps(0);
+        two.setTotalScore(0);
+
+        ArrayList<User> users = new ArrayList<>();
+        users.add(one);
+        users.add(two);
+
+        when(userRepository.getRanking(Pageable.unpaged())).thenReturn(users);
         service.getRanking(Pageable.unpaged());
         verify(userRepository, times(1)).getRanking(Pageable.unpaged());
     }
