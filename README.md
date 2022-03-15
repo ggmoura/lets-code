@@ -50,7 +50,7 @@ Copie o conteúdo do field token da resposta e utilize na interface do Swagger `
 }
 ```
 
-![Alt text](doc/swagger-auth.png?raw=true "Configurando token JWT no swagger"))
+![Alt text](doc/swagger-auth.png?raw=true "Configurando token JWT no swagger")
 
 # Fluxo padrão
 
@@ -69,5 +69,5 @@ O sisstema já inicializa com 21 filmes, é possível cadastrar novos filmes uti
 # Testes
 Todos os métodos de negócio foram testados
 
-![Alt text](doc/code_coverage.png?raw=true "Configurando token JWT no swagger"))
+![Alt text](doc/code_coverage.png?raw=true "Configurando token JWT no swagger")
 
