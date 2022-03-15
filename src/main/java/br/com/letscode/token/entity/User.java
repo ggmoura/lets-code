@@ -24,6 +24,12 @@ public class User extends BaseEntity<Long> {
 	@Column(name = "name", nullable = false)
 	private String name;
 
+	@Column(name = "score")
+	private Integer totalScore;
+
+	@Column(name = "qtd_steps")
+	private Integer totalSteps;
+
 	@ElementCollection(targetClass = Privilege.class, fetch = FetchType.EAGER)
 	@CollectionTable
 	@Enumerated(EnumType.STRING)
@@ -74,5 +80,21 @@ public class User extends BaseEntity<Long> {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Integer getTotalScore() {
+		return totalScore;
+	}
+
+	public void setTotalScore(Integer totalScore) {
+		this.totalScore = totalScore;
+	}
+
+	public Integer getTotalSteps() {
+		return totalSteps;
+	}
+
+	public void setTotalSteps(Integer totalSteps) {
+		this.totalSteps = totalSteps;
 	}
 }

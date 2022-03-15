@@ -77,6 +77,11 @@ public class QuizService {
         Quiz quiz = quizRepository.findByUserAndFinished(user, Boolean.FALSE).orElseThrow(() ->
                 new BusinessException(ResponseMessage.error("Não existe um Quiz iniciado para o usuário {0}", username)));
         quiz.setFinished(Boolean.TRUE);
+        quiz.getSteps().forEach(step -> {
+            if (step.getRightAnswer() == null) {
+                step.setRightAnswer(Boolean.FALSE);
+            }
+        });
         quizRepository.save(quiz);
         return mapper.map(quiz, QuizResponse.class);
     }

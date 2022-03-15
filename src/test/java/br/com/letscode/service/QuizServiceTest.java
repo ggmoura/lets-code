@@ -16,7 +16,6 @@ import br.com.letscode.repository.QuizStepRepository;
 import br.com.letscode.token.entity.User;
 import br.com.letscode.token.repository.UserRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -116,7 +116,10 @@ class QuizServiceTest {
         user.setPrivileges(new ArrayList<>());
         user.setName("teate");
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
-        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(new Quiz()));
+        Quiz quiz = new Quiz();
+        quiz.setSteps(new ArrayList<>());
+        quiz.getSteps().add(new QuizStep());
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(quiz));
         when(quizRepository.save(any())).thenReturn(any());
         service.finishQuiz("quiz");
         verify(userRepository, times(1)).findByUsername(anyString());
@@ -131,6 +134,19 @@ class QuizServiceTest {
         when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.empty());
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             service.finishQuiz("teste");
+        });
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
+        assertThat(exception.getErrors().size(), is(1));
+        assertEquals("Não existe um Quiz iniciado para o usuário {0}", exception.getErrors().get(0).getText());
+    }
+
+    @Test
+    @DisplayName("Deve levantar excecao BusinessException quando nao encontrar um quiz ativo")
+    void nextStepException() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(new User()));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.empty());
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            service.nextStep("teste");
         });
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
         assertThat(exception.getErrors().size(), is(1));
@@ -220,6 +236,33 @@ class QuizServiceTest {
     }
 
     @Test
+    @DisplayName("Deve levantar excecao BusinessException quando nao encontrar um quiz ativo")
+    void responseQuizExceptionQuiz() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(new User()));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.empty());
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            service.responseQuiz("teste", any());
+        });
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
+        assertThat(exception.getErrors().size(), is(1));
+        assertEquals("Não existe um Quiz iniciado para o usuário {0}", exception.getErrors().get(0).getText());
+    }
+
+    @Test
+    @DisplayName("Deve levantar excecao BusinessException quando nao encontrar uma step criada")
+    void responseQuizExceptionQuizStep() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(new User()));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(new Quiz()));
+        when(quizStepRepository.findByUserSelectedMovie(new User())).thenReturn(Optional.empty());
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            service.responseQuiz("teste", any());
+        });
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
+        assertThat(exception.getErrors().size(), is(1));
+        assertEquals("Não existe um Step criada para o quiz", exception.getErrors().get(0).getText());
+    }
+
+    @Test
     void responseQuiz() {
         User user = new User();
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
@@ -280,10 +323,32 @@ class QuizServiceTest {
         assertEquals("Você errou qual filme possui maior pontuação 3 vezes, o Quiz foi finalizado automaticamente, " +
                 "sua porcentagem de acertos foi {0}", exception.getErrors().get(0).getText());
 
+
+        movieDTOA.setImdbRating("N/A");
+        movieDTOA.setImdbVotes("N/A");
+
+        movieDTOB.setImdbRating("N/A");
+        movieDTOB.setImdbVotes("N/A");
+
+        when(client.getMovieByImdbID(anyString(), anyString())).thenReturn(movieDTOA, movieDTOB);
+        exception = assertThrows(BusinessException.class, () -> {
+            service.responseQuiz("responseQuiz", request);
+        });
+        assertTrue(q.getFinished());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
+        assertThat(exception.getErrors().size(), is(1));
+        assertEquals("Filme sem dados suficientes na plataforma {0}, ImdbRating={1}, ImdbVotes={2}",
+                exception.getErrors().get(0).getText());
+
+
+
     }
 
     @Test
     void getRanking() {
+        when(quizRepository.getRanking(Pageable.unpaged())).thenReturn(new ArrayList<>());
+        service.getRanking(Pageable.unpaged());
+        verify(quizRepository, times(1)).getRanking(Pageable.unpaged());
     }
 
 }
