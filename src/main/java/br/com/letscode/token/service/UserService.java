@@ -40,6 +40,8 @@ public class UserService {
 			user.setPassword(encoder.encode(user.getPassword()));
 			user.setPrivileges(new ArrayList<>());
 			user.getPrivileges().add(Privilege.PLAYER);
+			user.setTotalSteps(0);
+			user.setTotalScore(0);
 			final User newUser = this.userRepository.save(user);
 			return modelMapper.map(newUser, UserResponse.class);
 		} else {
@@ -54,6 +56,8 @@ public class UserService {
 			user.setUsername(username);
 			user.setPassword(password);
 			user.setName(name);
+			user.setTotalSteps(0);
+			user.setTotalScore(0);
 			user.setPrivileges(new ArrayList<>());
 			Arrays.asList(privileges).forEach(privilege -> user.getPrivileges().add(privilege));
 			this.userRepository.save(user);

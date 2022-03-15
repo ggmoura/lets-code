@@ -83,6 +83,9 @@ public class QuizService {
             }
         });
         quizRepository.save(quiz);
+        user.setTotalScore(user.getTotalScore() + quiz.getScore());
+        user.setTotalSteps(user.getTotalSteps() + quiz.getQtdSteps());
+        userRepository.save(user);
         return mapper.map(quiz, QuizResponse.class);
     }
 
@@ -164,6 +167,9 @@ public class QuizService {
         }
         quizRepository.save(quiz);
         if (quiz.getFinished()) {
+            user.setTotalScore(user.getTotalScore() + quiz.getScore());
+            user.setTotalSteps(user.getTotalSteps() + quiz.getQtdSteps());
+            userRepository.save(user);
             throw new BusinessException(
                     "Você errou qual filme possui maior pontuação 3 vezes, o Quiz foi finalizado automaticamente, " +
                             "sua porcentagem de acertos foi {0}", String.valueOf(quiz.getScore().doubleValue() / quiz.getQtdSteps()));

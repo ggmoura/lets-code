@@ -112,11 +112,15 @@ class QuizServiceTest {
             "quizRepository.save sejam executados uma vez cada")
     void finishQuiz() {
         User user = new User();
+        user.setTotalSteps(0);
+        user.setTotalScore(0);
         user.setPassword("teste");
         user.setPrivileges(new ArrayList<>());
         user.setName("teate");
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
         Quiz quiz = new Quiz();
+        quiz.setScore(0);
+        quiz.setQtdSteps(0);
         quiz.setSteps(new ArrayList<>());
         quiz.getSteps().add(new QuizStep());
         when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(quiz));
@@ -265,11 +269,15 @@ class QuizServiceTest {
     @Test
     void responseQuiz() {
         User user = new User();
+        user.setTotalScore(0);
+        user.setTotalSteps(0);
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
         when(properties.getApiKey()).thenReturn("somewayKey");
         Quiz q = new Quiz();
         q.setFinished(Boolean.FALSE);
         q.setId(1L);
+        q.setScore(0);
+        q.setQtdSteps(0);
         q.setScore(0);
         q.setQtdSteps(0);
         when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(q));
