@@ -73,14 +73,15 @@ public class QuizService {
     }
 
     private Movie getRandomMovie(List<Long> excludes, Long maxResults, Random random) {
-        Integer idMovie = random.nextInt(maxResults.intValue());
-        if (idMovie.equals(0)) {
-            idMovie++;
+        if (maxResults >= 6) {
+            Integer idMovie = random.nextInt(maxResults.intValue() - 1) + 1;
+            if (excludes.contains(idMovie)) {
+                return getRandomMovie(excludes, maxResults, random);
+            }
+            return movieRepository.findById(idMovie.longValue()).get();
+        } else {
+            throw new BusinessException(ResponseMessage.error("É necessário que tenham mais de {0} filmes cadastrados", "6"));
         }
-        if (excludes.contains(idMovie)) {
-            return getRandomMovie(excludes, maxResults, random);
-        }
-        return movieRepository.findById(idMovie.longValue()).get();
     }
 
     public QuizResponse finishQuiz(String username) {
@@ -131,7 +132,7 @@ public class QuizService {
 
         Double scoreMoveA = calculateScore(movieA);
         Double scoreMoveB = calculateScore(movieB);
-        if (scoreMoveA == scoreMoveB) {
+        if (scoreMoveA.equals(scoreMoveB)) {
             quizStep.setRightAnswer(Boolean.TRUE);
         } else if (scoreMoveA > scoreMoveB) {
             quizStep.setRightAnswer(request.getSelectedMovie() == SelectedMovie.A);

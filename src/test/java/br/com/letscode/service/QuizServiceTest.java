@@ -1,32 +1,262 @@
 package br.com.letscode.service;
 
+import br.com.letscode.client.MovieClient;
+import br.com.letscode.configuration.SharedPropertiesConfiguration;
+import br.com.letscode.controller.model.movie.MovieDTO;
+import br.com.letscode.controller.model.quiz.QuizStepRequest;
+import br.com.letscode.controller.model.quiz.QuizStepResponse;
+import br.com.letscode.entity.Movie;
+import br.com.letscode.entity.Quiz;
+import br.com.letscode.entity.QuizStep;
+import br.com.letscode.entity.SelectedMovie;
+import br.com.letscode.exception.BusinessException;
+import br.com.letscode.repository.MovieRepository;
+import br.com.letscode.repository.QuizRepository;
+import br.com.letscode.repository.QuizStepRepository;
+import br.com.letscode.token.entity.User;
+import br.com.letscode.token.repository.UserRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.springframework.http.HttpStatus;
 
-//@ExtendWith(MockitoExtension.class)
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+
+@ExtendWith(MockitoExtension.class)
 class QuizServiceTest {
+
+    @InjectMocks
+    private QuizService service;
+
+    @Mock
+    private QuizRepository quizRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private MovieRepository movieRepository;
+
+    @Mock
+    private QuizStepRepository quizStepRepository;
+
+    @Spy
+    private ModelMapper mapper;
+
+    @Mock
+    private MovieClient client;
+
+    @Mock
+    private SharedPropertiesConfiguration properties;
 
     @BeforeEach
     void setUp() {
     }
 
     @Test
+    @DisplayName("Deve garantir que os metodos " +
+            "userRepository.findByUsername, " +
+            "quizRepository.findByUserAndFinished e " +
+            "quizRepository.save, sejam invocados uma vez, em caso de sucesso")
     void startQuiz() {
+        User user = new User();
+        user.setPassword("teste");
+        user.setPrivileges(new ArrayList<>());
+        user.setName("teate");
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.empty());
+        when(quizRepository.save(any())).thenReturn(any());
+        service.startQuiz("teste");
+        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(quizRepository, times(1)).findByUserAndFinished(any(), anyBoolean());
+        verify(quizRepository, times(1)).save(any());
     }
 
     @Test
+    @DisplayName("Deve levantar excecao BusinessException quando ja existir um quiz ativo")
+    void startQuizException() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(new User()));
+        Quiz q = new Quiz();
+        q.setId(1L);
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(q));
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            service.startQuiz("teste");
+        });
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
+        assertThat(exception.getErrors().size(), is(1));
+        assertEquals("Já existe um Quiz iniciado para o usuário {0}", exception.getErrors().get(0).getText());
+    }
+
+    @Test
+    @DisplayName("Deve garantir que os metodos " +
+            "userRepository.findByUsername, " +
+            "quizRepository.findByUserAndFinished, " +
+            "quizRepository.save sejam executados uma vez cada")
     void finishQuiz() {
+        User user = new User();
+        user.setPassword("teste");
+        user.setPrivileges(new ArrayList<>());
+        user.setName("teate");
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(new Quiz()));
+        when(quizRepository.save(any())).thenReturn(any());
+        service.finishQuiz("quiz");
+        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(quizRepository, times(1)).findByUserAndFinished(any(), anyBoolean());
+        verify(quizRepository, times(1)).save(any());
     }
 
     @Test
+    @DisplayName("Deve levantar excecao BusinessException quando nao encontrar um quiz ativo")
+    void finishQuizException() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(new User()));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.empty());
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            service.finishQuiz("teste");
+        });
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
+        assertThat(exception.getErrors().size(), is(1));
+        assertEquals("Não existe um Quiz iniciado para o usuário {0}", exception.getErrors().get(0).getText());
+    }
+
+    @Test
+    @DisplayName("Deve criar quizstep")
     void nextStep() {
+        User user = new User();
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(new Quiz()));
+        when(quizStepRepository.findByUserSelectedMovie(user)).thenReturn(Optional.empty());
+        when(movieRepository.countMovies()).thenReturn(6L);
+        Movie movie = new Movie();
+        movie.setId(1L);
+        when(movieRepository.findById(anyLong())).thenReturn(Optional.of(movie));
+        service.nextStep("nextStep");
+        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(quizRepository, times(1)).findByUserAndFinished(any(), anyBoolean());
+    }
+
+    @Test
+    @DisplayName("Deve recuperar quizstep ja criado")
+    void nextStepWithExists() {
+        User user = new User();
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(new Quiz()));
+        QuizStep quizStep = new QuizStep();
+        Movie movieA = new Movie();
+        movieA.setTitle("movieA");
+        movieA.setImdbID("movieA");
+        quizStep.setMovieA(movieA);
+        Movie movieB = new Movie();
+        movieB.setTitle("movieB");
+        movieB.setImdbID("movieB");
+        quizStep.setMovieB(movieB);
+        when(quizStepRepository.findByUserSelectedMovie(any())).thenReturn(Optional.of(quizStep));
+        QuizStepResponse resp = service.nextStep("nextStep");
+        assertEquals("movieA", resp.getMovieA().getImdbID());
+        assertEquals("movieA", resp.getMovieA().getTitle());
+        assertEquals("movieB", resp.getMovieB().getImdbID());
+        assertEquals("movieB", resp.getMovieB().getTitle());
+    }
+
+    @Test
+    @DisplayName("Deve levantar excecao quanto tiver menos de seis filmes cadastrados, quantidade minima para permitir tres jogadas e finalizar automatico")
+    void nextStepQuantityMoviesException() {
+        User user = new User();
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(new Quiz()));
+        when(quizStepRepository.findByUserSelectedMovie(user)).thenReturn(Optional.empty());
+        when(movieRepository.countMovies()).thenReturn(5L);
+        Movie movie = new Movie();
+        movie.setId(1L);
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            service.nextStep("nextStep");
+        });
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
+        assertThat(exception.getErrors().size(), is(1));
+        assertEquals("É necessário que tenham mais de {0} filmes cadastrados", exception.getErrors().get(0).getText());
     }
 
     @Test
     void responseQuiz() {
+        User user = new User();
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(properties.getApiKey()).thenReturn("somewayKey");
+        Quiz q = new Quiz();
+        q.setFinished(Boolean.FALSE);
+        q.setId(1L);
+        q.setScore(0);
+        q.setQtdSteps(0);
+        when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(q));
+        QuizStep quizStep = new QuizStep();
+        Movie movieA = new Movie();
+        movieA.setImdbID("movieA");
+        quizStep.setMovieA(movieA);
+        Movie movieB = new Movie();
+        movieB.setImdbID("movieB");
+        quizStep.setMovieB(movieB);
+        when(quizStepRepository.findByUserSelectedMovie(user)).thenReturn(Optional.of(quizStep));
+        MovieDTO movieDTOA = new MovieDTO();
+        movieDTOA.setImdbRating("100");
+        movieDTOA.setImdbVotes("10");
+        MovieDTO movieDTOB = new MovieDTO();
+        movieDTOB.setImdbRating("30");
+        movieDTOB.setImdbVotes("10");
+        when(client.getMovieByImdbID(anyString(), anyString())).thenReturn(movieDTOA, movieDTOB);
+
+        QuizStepRequest request = new QuizStepRequest();
+        request.setSelectedMovie(SelectedMovie.A);
+
+        QuizStepResponse response = service.responseQuiz("responseQuiz", request);
+        assertTrue(response.getRightAnswer());
+        assertThat(1, is(q.getQtdSteps()));
+        assertThat(1, is(q.getScore()));
+
+        movieDTOB.setImdbRating("100");
+        movieDTOB.setImdbVotes("10");
+        when(client.getMovieByImdbID(anyString(), anyString())).thenReturn(movieDTOA, movieDTOB);
+
+        response = service.responseQuiz("responseQuiz", request);
+        assertTrue(response.getRightAnswer());
+
+        movieDTOB.setImdbRating("1000");
+        movieDTOB.setImdbVotes("10");
+        when(client.getMovieByImdbID(anyString(), anyString())).thenReturn(movieDTOA, movieDTOB);
+
+        response = service.responseQuiz("responseQuiz", request);
+        assertFalse(response.getRightAnswer());
+
+        when(client.getMovieByImdbID(anyString(), anyString())).thenReturn(movieDTOA, movieDTOB);
+        when(quizStepRepository.countWrongAnswers(user)).thenReturn(4L);
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            service.responseQuiz("responseQuiz", request);
+        });
+        assertTrue(q.getFinished());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getHttpStatus());
+        assertThat(exception.getErrors().size(), is(1));
+        assertEquals("Você errou qual filme possui maior pontuação 3 vezes, o Quiz foi finalizado automaticamente, " +
+                "sua porcentagem de acertos foi {0}", exception.getErrors().get(0).getText());
+
     }
 
     @Test
