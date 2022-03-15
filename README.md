@@ -66,4 +66,8 @@ O sisstema já inicializa com 21 filmes, é possível cadastrar novos filmes uti
  * ```POST /movies/title``` informando exatamente o título do filme
  * ```POST /movies/imdbid``` informando o imdbid da plataforma
 
+# Testes
+Todos os métodos de negócio foram testados
+
+![Alt text](doc/code_coverage.png?raw=true "Configurando token JWT no swagger"))
 
