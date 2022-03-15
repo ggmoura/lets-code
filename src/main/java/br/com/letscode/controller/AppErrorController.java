@@ -25,7 +25,6 @@ public class AppErrorController implements ErrorController {
 		return new ResponseEntity<ResponseObject<Void>>(r, status);
 	}
 
-	@Override
 	public String getErrorPath() {
 		return ERROR_PATH;
 	}
