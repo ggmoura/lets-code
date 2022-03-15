@@ -34,9 +34,7 @@ import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -147,12 +145,37 @@ class QuizServiceTest {
         when(quizRepository.findByUserAndFinished(any(), anyBoolean())).thenReturn(Optional.of(new Quiz()));
         when(quizStepRepository.findByUserSelectedMovie(user)).thenReturn(Optional.empty());
         when(movieRepository.countMovies()).thenReturn(6L);
-        Movie movie = new Movie();
-        movie.setId(1L);
-        when(movieRepository.findById(anyLong())).thenReturn(Optional.of(movie));
+        Movie movie1 = new Movie();
+        movie1.setId(1L);
+        Movie movie2 = new Movie();
+        movie2.setId(1L);
+        Movie movie3 = new Movie();
+        movie3.setId(2L);
+        Movie movie4 = new Movie();
+        movie4.setId(3L);
+        when(movieRepository.findById(anyLong())).thenReturn(Optional.of(movie1), Optional.of(movie2), Optional.of(movie3), Optional.of(movie4));
         service.nextStep("nextStep");
         verify(userRepository, times(1)).findByUsername(anyString());
         verify(quizRepository, times(1)).findByUserAndFinished(any(), anyBoolean());
+        verify(movieRepository, times(4)).findById(anyLong());
+
+        movie1.setId(1L);
+        movie2.setId(2L);
+        movie3.setId(3L);
+        movie4.setId(4L);
+        when(movieRepository.findById(anyLong())).thenReturn(Optional.of(movie1), Optional.of(movie2), Optional.of(movie3), Optional.of(movie4));
+        when(quizStepRepository.getRespnsedQuizzesA(user)).thenReturn(Arrays.asList(1L));
+        when(quizStepRepository.getRespnsedQuizzesB(user)).thenReturn(Arrays.asList(2L));
+        service.nextStep("nextStep");
+        verify(movieRepository, times(8)).findById(anyLong());
+
+        movie1.setId(10L);
+        movie2.setId(20L);
+        when(movieRepository.findById(anyLong())).thenReturn(Optional.of(movie1), Optional.of(movie2));
+
+        service.nextStep("nextStep");
+        verify(movieRepository, times(10)).findById(anyLong());
+
     }
 
     @Test

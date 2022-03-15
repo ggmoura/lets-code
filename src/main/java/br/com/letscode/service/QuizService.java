@@ -52,6 +52,12 @@ public class QuizService {
     @Autowired
     private SharedPropertiesConfiguration properties;
 
+    private Random random;
+
+    public QuizService() {
+        random = new Random();
+    }
+
     public void startQuiz(String username) {
         User user = userRepository.findByUsername(username).get();
         Quiz quiz = quizRepository.findByUserAndFinished(user, Boolean.FALSE).orElse(new Quiz());
@@ -63,24 +69,6 @@ public class QuizService {
             quizRepository.save(quiz);
         } else {
             throw new BusinessException(ResponseMessage.error("Já existe um Quiz iniciado para o usuário {0}", username));
-        }
-    }
-
-    private Movie getRandomMovie(List<Long> excludes) {
-        Long qtdMovies = movieRepository.countMovies();
-        Random random = new Random();
-        return getRandomMovie(excludes, qtdMovies, random);
-    }
-
-    private Movie getRandomMovie(List<Long> excludes, Long maxResults, Random random) {
-        if (maxResults >= 6) {
-            Integer idMovie = random.nextInt(maxResults.intValue() - 1) + 1;
-            if (excludes.contains(idMovie)) {
-                return getRandomMovie(excludes, maxResults, random);
-            }
-            return movieRepository.findById(idMovie.longValue()).get();
-        } else {
-            throw new BusinessException(ResponseMessage.error("É necessário que tenham mais de {0} filmes cadastrados", "6"));
         }
     }
 
@@ -100,18 +88,15 @@ public class QuizService {
         Optional<QuizStep> quizStepOptional = quizStepRepository.findByUserSelectedMovie(user);
         QuizStepResponse response = new QuizStepResponse();
         if (quizStepOptional.isEmpty()) {
-            List<Long> excludedMovies = quizStepRepository.getRespnsedQuizzesB(user);
-            Movie movieA = getRandomMovie(excludedMovies);
-            excludedMovies = quizStepRepository.getRespnsedQuizzesA(user);
-            excludedMovies.add(movieA.getId());
-            Movie movieB = getRandomMovie(excludedMovies);
+            Long qtdMovies = movieRepository.countMovies();
+            List<Long> moviesA = quizStepRepository.getRespnsedQuizzesA(user);
+            List<Long> moviesB = quizStepRepository.getRespnsedQuizzesB(user);
             QuizStep quizStep = new QuizStep();
-            quizStep.setMovieA(movieA);
-            quizStep.setMovieB(movieB);
+            addMovies(quizStep, moviesA, moviesB, qtdMovies);
             quizStep.setQuiz(quiz);
             quizStepRepository.save(quizStep);
-            response.setMovieA(mapper.map(movieA, MovieResponse.class));
-            response.setMovieB(mapper.map(movieB, MovieResponse.class));
+            response.setMovieA(mapper.map(quizStep.getMovieA(), MovieResponse.class));
+            response.setMovieB(mapper.map(quizStep.getMovieB(), MovieResponse.class));
         } else {
             QuizStep step = quizStepOptional.get();
             response.setMovieA(mapper.map(step.getMovieA(), MovieResponse.class));
@@ -119,6 +104,28 @@ public class QuizService {
         }
         return response;
     }
+
+    private void addMovies(QuizStep quizStep, List<Long> moviesA, List<Long> moviesB, Long qtdMovies) {
+        if (qtdMovies >= 6) {
+            Integer idMovie = random.nextInt(qtdMovies.intValue() - 1) + 1;
+            Movie movieA = movieRepository.findById(idMovie.longValue()).get();
+            idMovie = random.nextInt(qtdMovies.intValue() - 1) + 1;
+            Movie movieB = movieRepository.findById(idMovie.longValue()).get();
+            if (movieA.getId().equals(movieB.getId())) {
+                addMovies(quizStep, moviesA, moviesB, qtdMovies);
+            } else if (
+                    moviesA.contains(movieA.getId()) && moviesB.contains(movieB.getId()) ||
+                            moviesA.contains(movieB.getId()) && moviesB.contains(movieA.getId())
+            ) {
+                addMovies(quizStep, moviesA, moviesB, qtdMovies);
+            }
+            quizStep.setMovieA(movieA);
+            quizStep.setMovieB(movieB);
+        } else {
+            throw new BusinessException(ResponseMessage.error("É necessário que tenham mais de {0} filmes cadastrados", "6"));
+        }
+    }
+
     public QuizStepResponse responseQuiz(String username, QuizStepRequest request) {
 
         User user = userRepository.findByUsername(username).get();
