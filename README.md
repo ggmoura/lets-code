@@ -9,10 +9,38 @@ Entrega do desafio técnico da Let's Code, para a posição de professor, tecnol
 #### http://localhost:8080/h2
 
 # Como testar
+
+Execute o metodo main da classe:
+```java
+package br.com.letscode;
+
+public class MoviesBattleApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(MoviesBattleApplication.class, args);
+	}
+
+}
+```
+
 Gere um token JWT utilizando o Postman ou Insomnia, existem dois perfis de usuário, o MANAGER E O PLAYER! 
 
-Usuários pré cadastrados!
+```shell
+curl --location --request POST 'localhost:8080/auth' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'username=sophia' \
+--data-urlencode 'password=123456'
+```
 
+Clique em File -> import e selecione [ raw text ] e cole a curl...
+
+![import_curl.png.png](doc/import_curl.png)
+
+Copie o token para utilizar os serviços
+
+![postman.png](doc/postman.png)
+
+Usuários pré cadastrados!
 
 ```java
 public class InitialDataLoaderListener {
@@ -35,13 +63,6 @@ public class InitialDataLoaderListener {
 }
 ```
 
-
-```shell
-curl --location --request POST 'localhost:8080/auth' \
---header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'username=sophia' \
---data-urlencode 'password=123456'
-```
 Copie o conteúdo do field token da resposta e utilize na interface do Swagger ```http://localhost:8080/swagger-ui/index.html#/``` para consumir os demais endpoints
 ```json
 {
@@ -65,6 +86,8 @@ Um novo PLAYER pode ser cadastrado utilizando o endpoint ```POST /players``` de 
 O sisstema já inicializa com 21 filmes, é possível cadastrar novos filmes utilizando o serviço do ```http://www.omdbapi.com``` utilizando dois enpoints,
  * ```POST /movies/title``` informando exatamente o título do filme
  * ```POST /movies/imdbid``` informando o imdbid da plataforma
+
+![Alt text](doc/swagger.png?raw=true "Swagger")
 
 # Testes
 Todos os métodos de negócio foram testados
