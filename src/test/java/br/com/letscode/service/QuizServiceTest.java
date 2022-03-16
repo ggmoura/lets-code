@@ -167,15 +167,21 @@ class QuizServiceTest {
         when(movieRepository.countMovies()).thenReturn(6L);
         Movie movie1 = new Movie();
         movie1.setId(1L);
+        movie1.setTitle("movie1Title");
         Movie movie2 = new Movie();
         movie2.setId(1L);
+        movie2.setTitle("movie2Title");
         Movie movie3 = new Movie();
         movie3.setId(2L);
+        movie3.setTitle("movie3Title");
         Movie movie4 = new Movie();
         movie4.setId(3L);
+        movie4.setTitle("movie4Title");
         when(movieRepository.findById(anyLong())).thenReturn(Optional.of(movie1), Optional.of(movie2), Optional.of(movie3), Optional.of(movie4));
-        service.nextStep("nextStep");
+        QuizStepResponse respmse = service.nextStep("nextStep");
         verify(userRepository, times(1)).findByUsername(anyString());
+        assertEquals("movie1Title", respmse.getMovieA().getTitle());
+        assertEquals("movie2Title", respmse.getMovieB().getTitle());
         verify(quizRepository, times(1)).findByUserAndFinished(any(), anyBoolean());
         verify(movieRepository, times(4)).findById(anyLong());
 
@@ -186,9 +192,10 @@ class QuizServiceTest {
         when(movieRepository.findById(anyLong())).thenReturn(Optional.of(movie1), Optional.of(movie2), Optional.of(movie3), Optional.of(movie4));
         when(quizStepRepository.getRespnsedQuizzesA(user)).thenReturn(Arrays.asList(1L));
         when(quizStepRepository.getRespnsedQuizzesB(user)).thenReturn(Arrays.asList(2L));
-        service.nextStep("nextStep");
+        respmse = service.nextStep("nextStep");
         verify(movieRepository, times(8)).findById(anyLong());
-
+        assertEquals("movie3Title", respmse.getMovieA().getTitle());
+        assertEquals("movie4Title", respmse.getMovieB().getTitle());
         movie1.setId(10L);
         movie2.setId(20L);
         when(movieRepository.findById(anyLong())).thenReturn(Optional.of(movie1), Optional.of(movie2));
