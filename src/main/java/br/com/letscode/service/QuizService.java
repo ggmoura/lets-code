@@ -131,7 +131,7 @@ public class QuizService {
                                     moviesA.get(i).equals(movieB.getId()) && moviesB.get(i).equals(movieA.getId())
                     ) {
                         addMovies(quizStep, moviesA, moviesB, qtdMovies);
-                        break;
+                        return;
                     }
                 }
             }
