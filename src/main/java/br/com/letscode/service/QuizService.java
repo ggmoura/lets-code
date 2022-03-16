@@ -124,11 +124,16 @@ public class QuizService {
             Movie movieB = movieRepository.findById(idMovie.longValue()).get();
             if (movieA.getId().equals(movieB.getId())) {
                 addMovies(quizStep, moviesA, moviesB, qtdMovies);
-            } else if (
-                    moviesA.contains(movieA.getId()) && moviesB.contains(movieB.getId()) ||
-                            moviesA.contains(movieB.getId()) && moviesB.contains(movieA.getId())
-            ) {
-                addMovies(quizStep, moviesA, moviesB, qtdMovies);
+            } else {
+                for (int i = 0; i < moviesA.size(); i++) {
+                    if (
+                            moviesA.get(i).equals(movieA.getId()) && moviesB.get(i).equals(movieB.getId()) ||
+                                    moviesA.get(i).equals(movieB.getId()) && moviesB.get(i).equals(movieA.getId())
+                    ) {
+                        addMovies(quizStep, moviesA, moviesB, qtdMovies);
+                        break;
+                    }
+                }
             }
             quizStep.setMovieA(movieA);
             quizStep.setMovieB(movieB);
